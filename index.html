@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Birthday Janu!</title>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Pinyon+Script&family=Parisienne&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-pink: #f4abbc; 
+            --cake-brown: #a67c52;
+            --cream-white: #ffffff;
+            --candle-red: rgba(195, 27, 27, 0.4);
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-pink);
+            font-family: 'Times New Roman', serif;
+            overflow: hidden;
+            transition: background-color 2s ease;
+        }
+
+        /* --- CANVASES --- */
+        #confetti-canvas, #starCanvas, #heartCanvas {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+        }
+        #confetti-canvas { z-index: 10; }
+        #starCanvas { z-index: 1; opacity: 0; transition: opacity 2s ease; }
+        #heartCanvas { z-index: 20; opacity: 0; transition: opacity 3s ease; }
+
+        /* --- SCENES --- */
+        .scene-cake {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 5;
+            transition: opacity 1.5s ease, transform 1.5s ease;
+        }
+
+        .scene-letter {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 6;
+            opacity: 0;
+            display: none;
+            transition: opacity 2s ease;
+        }
+
+        /* --- CAKE --- */
+        .cake { position: relative; width: 200px; height: 180px; margin: 0 auto 20px auto; }
+        .layer { position: absolute; background: var(--cake-brown); width: 100%; border-radius: 4px; transform: translateY(-600px); opacity: 0; }
+        .layer-bottom { height: 45px; bottom: 0; animation: drop-solid 0.6s ease-in forwards; animation-delay: 0.5s; }
+        .layer-top { height: 45px; bottom: 57px; animation: drop-solid 0.6s ease-in forwards; animation-delay: 2s; }
+        .cream-drip { position: absolute; background: var(--cream-white); width: 100%; height: 12px; border-radius: 10px; z-index: 2; transform: translateY(-600px); opacity: 0; }
+        .cream-1 { bottom: 45px; animation: drop-flexible 0.8s cubic-bezier(0.47, 0, 0.745, 0.715) forwards; animation-delay: 1.2s; }
+        .cream-2 { bottom: 102px; animation: drop-flexible 0.8s cubic-bezier(0.47, 0, 0.745, 0.715) forwards; animation-delay: 2.8s; }
+        .drip-dots { position: absolute; width: 100%; height: 8px; bottom: -4px; background-image: radial-gradient(circle, var(--cream-white) 60%, transparent 66%); background-size: 20px 20px; background-repeat: repeat-x; }
+        .candle { position: absolute; bottom: 114px; left: 50%; transform: translateX(-50%) translateY(-600px); width: 8px; height: 35px; background: white; opacity: 0; animation: drop-solid-candle 0.6s ease-out forwards; animation-delay: 3.5s; }
+        .flame { position: absolute; top: -15px; left: 50%; transform: translateX(-50%) scale(0); width: 12px; height: 18px; background: #ffdb58; border-radius: 50% 50% 20% 20%; box-shadow: 0 0 15px #ffdb58; animation: ignite 0.5s ease-out forwards, flicker 0.1s infinite alternate; animation-delay: 4.1s; }
+        .cake-message { opacity: 0; color: white; animation: fadeIn 1s forwards; animation-delay: 4.5s; }
+
+        /* --- ENVELOPE --- */
+        .envelope { position: relative; width: 280px; height: 180px; background: #fdfdfd; border-radius: 2px; box-shadow: 0 20px 60px rgba(255, 105, 180, 0.2); cursor: pointer; transition: transform 0.4s ease; margin: 0 auto; }
+        .flap { position: absolute; top: 0; left: 0; border-left: 140px solid transparent; border-right: 140px solid transparent; border-top: 110px solid #ececec; z-index: 4; }
+        .pocket { position: absolute; bottom: 0; left: 0; border-left: 140px solid transparent; border-right: 140px solid transparent; border-bottom: 110px solid #fff; z-index: 3; }
+        .heart-seal { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -20%); width: 70px; height: 70px; background: #c62828; clip-path: path('M35 65C35 65 0 40 0 20C0 8 12 0 26 0C30 0 35 4 35 4C35 4 40 0 44 0C58 0 70 8 70 20C70 40 35 65 35 65Z'); z-index: 10; display: flex; justify-content: center; align-items: center; animation: pulse 2s infinite; }
+        .heart-text { font-family: 'Great Vibes', cursive; color: #ffd700; font-size: 14px; font-weight: bold; }
+        .tap-hint { color: white; text-align: center; margin-top: 20px; opacity: 0.8; }
+
+        /* --- PDF STYLE FULL SCREEN LETTER --- */
+        .full-screen-pdf {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #fcfaf2; /* PDF/Paper background */
+            background-image: url('https://www.transparenttextures.com/patterns/handmade-paper.png');
+            z-index: 500;
+            overflow-y: auto; /* Scrollable like a real document */
+            display: none;
+            padding: 60px 20px;
+            box-sizing: border-box;
+            box-shadow: inset 0 0 100px rgba(0,0,0,0.05);
+        }
+
+        .pdf-content {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+            background: white; /* The "Page" itself */
+            padding: 80px 40px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            min-height: 100%;
+            border: 1px solid #eee;
+        }
+
+        .letter-heading { font-family: 'Parisienne', cursive; font-size: 3.5rem; color: #4b3621; margin-bottom: 40px; }
+        .letter-body { font-family: 'Pinyon Script', cursive; font-size: 2rem; line-height: 1.8; color: #3d2b1f; }
